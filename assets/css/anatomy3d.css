@@ -244,7 +244,7 @@
 @media (max-width: 1200px) {
   .anatomy-layout {
     grid-template-columns: 280px 1fr;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto auto;
     height: auto;
   }
   .info-panel { grid-column: 1 / -1; }
@@ -253,5 +253,76 @@
 @media (max-width: 768px) {
   .anatomy-layout {
     grid-template-columns: 1fr;
+    gap: 16px;
+    height: auto;
   }
+
+  .canvas-container {
+    height: 60vh;
+    min-height: 380px;
+    order: 1;
+  }
+
+  .systems-panel {
+    order: 2;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .info-panel {
+    order: 3;
+  }
+
+  .canvas-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    top: 10px; left: 10px; right: 10px;
+  }
+
+  .control-btn-group {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .control-btn-group button {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+
+  .organ-selector {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .organ-chip {
+    display: inline-block;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .canvas-container {
+    height: 52vh;
+    min-height: 320px;
+  }
+
+  .systems-panel {
+    max-height: 220px;
+    padding: 12px;
+  }
+
+  .system-card {
+    padding: 10px;
+  }
+
+  .system-icon {
+    width: 34px; height: 34px;
+    font-size: 0.95rem;
+  }
+
+  .system-title-en { font-size: 0.85rem; }
+  .system-title-si { font-size: 0.75rem; }
 }
