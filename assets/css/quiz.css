@@ -326,3 +326,19 @@
 .wrong-answer-q { font-size: 0.88rem; font-weight: 500; margin-bottom: 8px; }
 .wrong-answer-info { font-size: 0.8rem; color: var(--text-muted); }
 .wrong-answer-info span { color: var(--accent-green); font-weight: 600; }
+
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 600px) {
+  .quiz-setup-grid {
+    grid-template-columns: 1fr;
+  }
+  .question-card {
+    padding: 20px 16px;
+  }
+  .question-text {
+    font-size: 0.98rem;
+  }
+  .result-stats {
+    grid-template-columns: 1fr;
+  }
+}

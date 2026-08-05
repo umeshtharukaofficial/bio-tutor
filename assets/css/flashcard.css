@@ -292,3 +292,28 @@
   justify-content: center;
   gap: 6px;
 }
+
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 600px) {
+  .card-scene {
+    height: 280px;
+  }
+  .card-face {
+    padding: 24px 18px;
+  }
+  .card-term {
+    font-size: 1.25rem;
+  }
+  .card-def {
+    font-size: 0.88rem;
+  }
+  .srs-buttons {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .srs-btn {
+    flex: 1 1 45%;
+    padding: 10px 8px;
+    font-size: 0.8rem;
+  }
+}
