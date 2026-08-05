@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Tutor Chat — BioTutor</title>
+  <meta name="description" content="Chat with DeepSeek AI for expert A-Level Biology tutoring." />
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/sidebar.css" />
+  <link rel="stylesheet" href="../assets/css/chat.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .main-content { padding: 24px 28px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .chat-page-layout { flex: 1; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <button class="mobile-menu-btn" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">🧬</div>
+        <div class="logo-text"><span>Bio</span>Tutor</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Main</div>
+        <a href="../index.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="chat.html" class="nav-item active"><i class="fa-solid fa-robot"></i> AI Tutor <span class="nav-badge">AI</span></a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Study</div>
+        <a href="quiz.html" class="nav-item"><i class="fa-solid fa-circle-question"></i> Quiz</a>
+        <a href="flashcards.html" class="nav-item"><i class="fa-solid fa-layer-group"></i> Flashcards</a>
+        <a href="topics.html" class="nav-item"><i class="fa-solid fa-book-open"></i> Topics</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Track</div>
+        <a href="progress.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Progress</a>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-divider"></div>
+        <div class="api-status" title="Click to manage API key">
+          <div class="status-dot"></div>
+          <div class="api-status-text">
+            <strong>API Key Required</strong>
+            <span>Click to configure</span>
+          </div>
+          <i class="fa-solid fa-gear" style="color:var(--text-muted);font-size:0.8rem;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="page-header" style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <h1>AI <span>Tutor</span> Chat</h1>
+            <p>Powered by DeepSeek — your expert A-Level Biology study partner</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="clearChatBtn">
+            <i class="fa-solid fa-trash-can"></i> Clear Chat
+          </button>
+        </div>
+      </div>
+
+      <div class="chat-page-layout">
+        <!-- TOPIC SIDEBAR -->
+        <div class="chat-sidebar">
+          <h4>Quick Topics</h4>
+          <button class="topic-quick-btn" onclick="setQuickPrompt('Explain the structure of a cell membrane using the fluid mosaic model')">
+            <i class="fa-solid fa-circle-nodes"></i> Cell Membrane
+          </button>
+          <button class="topic-quick-btn" onclick="setQuickPrompt('Explain DNA replication step by step')">
+            <i class="fa-solid fa-dna"></i> DNA Replication
+          </button>
+          <button class="topic-quick-btn" onclick="setQuickPrompt('Explain the stages of mitosis with what happens in each phase')">
+            <i class="fa-solid fa-arrows-split-up-and-left"></i> Mitosis Stages
+          </button>
+          <button class="topic-quick-btn" onclick="setQuickPrompt('Explain enzyme inhibition: competitive vs non-competitive')">
+            <i class="fa-solid fa-flask"></i> Enzyme Inhibition
+          </button>
+          <button class="topic-quick-btn" onclick="setQuickPrompt('Explain Mendel\'s laws of inheritance with examples')">
+            <i class="fa-solid fa-dna"></i> Mendel\'s Laws
+          </button>
+          <button class="topic-quick-btn" onclick="setQuickPrompt('Explain the light-dependent reactions of photosynthesis')">
+            <i class="fa-solid fa-seedling"></i> Photosynthesis
+          </button>
+          <button class="topic-quick-btn" onclick="setQuickPrompt('Generate 5 MCQ questions on Cell Biology for A-Level exam')">
+            <i class="fa-solid fa-circle-question"></i> Generate MCQs
+          </button>
+          <button class="topic-quick-btn" onclick="setQuickPrompt('Give me a mnemonic to remember the phases of meiosis')">
+            <i class="fa-solid fa-brain"></i> Memory Tips
+          </button>
+        </div>
+
+        <!-- MAIN CHAT -->
+        <div class="chat-main">
+          <!-- CHAT HEADER -->
+          <div class="chat-header">
+            <div class="chat-header-info">
+              <div class="ai-avatar">🤖</div>
+              <div>
+                <h3>BioTutor AI</h3>
+                <small id="chatStatusText">Ready to help</small>
+              </div>
+            </div>
+            <div class="chat-header-actions">
+              <div class="context-bar" style="padding:0;border:none;background:none;">
+                <label>Topic:</label>
+                <select id="topicContext" onchange="updateTopicContext()">
+                  <option value="">General Biology</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- MESSAGES -->
+          <div class="messages-area" id="messagesArea">
+            <!-- Welcome State -->
+            <div class="chat-welcome" id="chatWelcome">
+              <div class="welcome-icon float">🧬</div>
+              <h2>Hello! I'm <span style="background:var(--grad-green);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">BioTutor AI</span></h2>
+              <p>Your expert A-Level Biology tutor. Ask me anything about the Sri Lanka curriculum — I explain concepts, generate MCQs, give memory tips, and more!</p>
+              <div class="quick-prompts">
+                <button class="quick-prompt-btn" onclick="setQuickPrompt('What is the difference between mitosis and meiosis?')">Mitosis vs Meiosis</button>
+                <button class="quick-prompt-btn" onclick="setQuickPrompt('Explain the structure of DNA')">DNA Structure</button>
+                <button class="quick-prompt-btn" onclick="setQuickPrompt('How does the immune system work?')">Immune System</button>
+                <button class="quick-prompt-btn" onclick="setQuickPrompt('Explain natural selection with an example')">Natural Selection</button>
+                <button class="quick-prompt-btn" onclick="setQuickPrompt('Generate 5 MCQs on Genetics for A-Level')">Generate MCQs</button>
+                <button class="quick-prompt-btn" onclick="setQuickPrompt('What is the role of ATP in cells?')">ATP & Energy</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- INPUT AREA -->
+          <div class="chat-input-area">
+            <div class="chat-input-wrapper">
+              <textarea
+                class="chat-textarea"
+                id="chatInput"
+                placeholder="Ask anything about A-Level Biology..."
+                rows="1"
+                onkeydown="handleInputKey(event)"
+                oninput="autoResize(this)"
+              ></textarea>
+              <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send (Enter)">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+            <div class="chat-input-hint">Press <kbd style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:0.7rem;">Enter</kbd> to send · <kbd style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:0.7rem;">Shift+Enter</kbd> for newline</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- API KEY MODAL -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="icon-box icon-box-green"><i class="fa-solid fa-key"></i></div>
+        <div>
+          <h3 style="margin:0;">DeepSeek API Key</h3>
+          <small>Required for AI features</small>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="input-group" style="margin-bottom:14px;">
+          <label>API Key</label>
+          <input type="password" class="input" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" />
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0;">
+          <i class="fa-solid fa-lock"></i> Stored locally only. Get yours at
+          <a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent-teal);">platform.deepseek.com</a>
+        </p>
+        <div id="apiKeyStatus" style="margin-top:10px;font-size:0.85rem;font-weight:600;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="testApiKey"><i class="fa-solid fa-flask"></i> Test</button>
+        <button class="btn btn-primary" id="saveApiKey"><i class="fa-solid fa-check"></i> Save & Start Chatting</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/deepseek.js"></script>
+  <script src="../assets/js/topics.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    // ── Chat State ──
+    let messages = [];
+    let isStreaming = false;
+
+    // ── Init ──
+    function initChat() {
+      // Populate topic dropdown
+      const sel = document.getElementById('topicContext');
+      TopicUtils.getDropdownOptions().forEach(opt => {
+        const el = document.createElement('option');
+        el.value = opt.value;
+        el.textContent = opt.label;
+        sel.appendChild(el);
+      });
+
+      // Load saved history
+      messages = Storage.getChatHistory();
+      if (messages.length > 0) {
+        document.getElementById('chatWelcome').style.display = 'none';
+        messages.forEach(m => renderMessage(m.role, m.content));
+      }
+
+      // Check API key
+      if (!Storage.getApiKey()) {
+        setTimeout(() => ApiKeyModal.show(), 800);
+      }
+    }
+
+    function updateTopicContext() {
+      const topicId = document.getElementById('topicContext').value;
+      const topic = topicId ? TopicUtils.getById(topicId) : null;
+      Toast.show(topic ? `Topic set: ${topic.title}` : 'General Biology mode', 'info', 2000);
+    }
+
+    // ── Render Message ──
+    function renderMessage(role, content, isStreaming = false) {
+      const area = document.getElementById('messagesArea');
+      document.getElementById('chatWelcome').style.display = 'none';
+
+      const msgEl = document.createElement('div');
+      msgEl.className = `message ${role}`;
+      const msgId = 'msg-' + Date.now() + Math.random();
+      msgEl.id = msgId;
+
+      const avatarIcon = role === 'ai' ? '🤖' : '👤';
+      const bubbleClass = role === 'ai' ? '' : '';
+      const time = formatTime();
+
+      msgEl.innerHTML = `
+        <div class="message-avatar">${avatarIcon}</div>
+        <div class="message-body">
+          <div class="message-bubble" id="bubble-${msgId}">${role === 'ai' ? '' : escapeHtml(content)}</div>
+          <div class="message-meta">
+            <span class="message-time">${time}</span>
+            ${role === 'ai' ? `<button class="copy-btn" onclick="copyToClipboard(document.getElementById('bubble-${msgId}').innerText)"><i class="fa-regular fa-copy"></i> Copy</button>` : ''}
+          </div>
+        </div>
+      `;
+
+      area.appendChild(msgEl);
+      area.scrollTop = area.scrollHeight;
+
+      return msgId;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ── Typing Indicator ──
+    function showTyping() {
+      const area = document.getElementById('messagesArea');
+      const el = document.createElement('div');
+      el.id = 'typingIndicator';
+      el.className = 'typing-indicator';
+      el.innerHTML = `
+        <div class="message-avatar">🤖</div>
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+        <span style="font-size:0.8rem;color:var(--text-muted);">BioTutor AI is thinking...</span>
+      `;
+      area.appendChild(el);
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function hideTyping() {
+      document.getElementById('typingIndicator')?.remove();
+    }
+
+    // ── Send Message ──
+    async function sendMessage() {
+      if (isStreaming) return;
+
+      const input = document.getElementById('chatInput');
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      const apiKey = Storage.getApiKey();
+      if (!apiKey || !DeepSeek.isValidKey(apiKey)) {
+        ApiKeyModal.show(() => sendMessage());
+        return;
+      }
+
+      // Add to messages array
+      messages.push({ role: 'user', content: userText });
+      renderMessage('user', userText);
+      input.value = '';
+      autoResize(input);
+
+      // UI state
+      isStreaming = true;
+      document.getElementById('sendBtn').disabled = true;
+      document.getElementById('chatStatusText').textContent = 'Thinking...';
+      showTyping();
+
+      // Build API messages (filter to user/assistant only)
+      const apiMessages = messages
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .map(m => ({ role: m.role, content: m.content }));
+
+      const topicId = document.getElementById('topicContext').value;
+      const topicObj = topicId ? TopicUtils.getById(topicId) : null;
+      const topicContext = topicObj ? `${topicObj.title} (Unit ${topicObj.unit}, Grade ${topicObj.grade})` : null;
+
+      try {
+        hideTyping();
+        const msgId = renderMessage('ai', '', true);
+        const bubble = document.getElementById(`bubble-${msgId}`);
+        let fullContent = '';
+
+        const gen = DeepSeek.streamChat(apiMessages, apiKey, { topicContext });
+        for await (const token of gen) {
+          fullContent += token;
+          bubble.innerHTML = renderMarkdown(fullContent);
+          document.getElementById('messagesArea').scrollTop =
+            document.getElementById('messagesArea').scrollHeight;
+        }
+
+        // Save response
+        messages.push({ role: 'assistant', content: fullContent });
+        Storage.saveChatHistory(messages);
+
+      } catch (err) {
+        hideTyping();
+        Toast.show('Error: ' + err.message, 'error');
+        if (err.message.includes('401') || err.message.includes('key')) {
+          ApiKeyModal.show();
+        }
+        messages.pop(); // remove failed user message
+      }
+
+      isStreaming = false;
+      document.getElementById('sendBtn').disabled = false;
+      document.getElementById('chatStatusText').innerHTML =
+        '<span style="color:var(--accent-green)">● </span>Ready to help';
+    }
+
+    function handleInputKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function setQuickPrompt(text) {
+      const input = document.getElementById('chatInput');
+      input.value = text;
+      autoResize(input);
+      input.focus();
+    }
+
+    // Clear chat
+    document.getElementById('clearChatBtn').addEventListener('click', () => {
+      if (messages.length === 0) return;
+      if (confirm('Clear chat history?')) {
+        messages = [];
+        Storage.clearChatHistory();
+        document.getElementById('messagesArea').innerHTML = '';
+        // Re-add welcome
+        const welcome = document.createElement('div');
+        welcome.className = 'chat-welcome';
+        welcome.id = 'chatWelcome';
+        welcome.innerHTML = `
+          <div class="welcome-icon float">🧬</div>
+          <h2>Chat cleared! Ready to help again.</h2>
+          <p>What biology topic shall we explore?</p>
+        `;
+        document.getElementById('messagesArea').appendChild(welcome);
+        Toast.show('Chat cleared', 'info');
+      }
+    });
+
+    initChat();
+  </script>
+</body>
+</html>

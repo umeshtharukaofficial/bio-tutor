@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BioTutor AI — A-Level Biology Study Platform</title>
+  <meta name="description" content="AI-powered A-Level Biology tutor for Sri Lanka curriculum. Chat with DeepSeek AI, practice MCQs, and study with smart flashcards." />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/sidebar.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* Dashboard Specific */
+    .hero-section {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 48px 40px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+
+    .hero-section::before {
+      content: '🧬';
+      position: absolute;
+      right: 40px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 8rem;
+      opacity: 0.08;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      background: var(--accent-green-dim);
+      border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent-green);
+      margin-bottom: 16px;
+    }
+
+    .hero-section h1 { margin-bottom: 10px; }
+
+    .hero-section p {
+      max-width: 500px;
+      font-size: 1rem;
+      margin-bottom: 24px;
+    }
+
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* Stat Cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      padding: 20px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: var(--trans);
+    }
+
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+
+    .stat-info { flex: 1; }
+    .stat-value {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* Quick Access Cards */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .quick-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 28px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      backdrop-filter: blur(20px);
+      text-decoration: none;
+      transition: var(--trans);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .quick-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 100px; height: 100px;
+      border-radius: 50% 0 0 0;
+      opacity: 0.05;
+      transition: var(--trans);
+    }
+
+    .quick-card.card-green::after { background: var(--accent-green); }
+    .quick-card.card-teal::after  { background: var(--accent-teal); }
+    .quick-card.card-purple::after{ background: var(--accent-purple); }
+    .quick-card.card-orange::after{ background: var(--accent-orange); }
+
+    .quick-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); }
+    .quick-card:hover::after { opacity: 0.12; }
+
+    .quick-card-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .quick-card h3 { margin: 0; font-size: 1.05rem; }
+    .quick-card p  { margin: 0; font-size: 0.82rem; }
+
+    .quick-card-arrow {
+      margin-top: auto;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.7;
+      transition: var(--trans);
+    }
+
+    .quick-card:hover .quick-card-arrow {
+      opacity: 1;
+      gap: 10px;
+    }
+
+    /* Daily Fact Section */
+    .daily-fact-section {
+      padding: 24px;
+      background: linear-gradient(135deg, rgba(34,197,94,0.06), rgba(6,182,212,0.06));
+      border: 1px solid rgba(34,197,94,0.15);
+      border-radius: var(--radius-xl);
+      margin-bottom: 28px;
+    }
+
+    .daily-fact-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .daily-fact-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent-green);
+    }
+
+    #dailyFactText {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* Topic Progress */
+    .topic-progress-section h3 { margin-bottom: 16px; }
+
+    .topic-progress-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .topic-progress-name {
+      width: 200px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .topic-progress-bar { flex: 1; }
+
+    .topic-progress-pct {
+      width: 40px;
+      text-align: right;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* DNA background animation */
+    .dna-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      opacity: 0.3;
+      animation: float calc(3s + var(--delay, 0s)) ease-in-out infinite;
+    }
+
+    @media (max-width: 1024px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .hero-section { padding: 32px 24px; }
+      .quick-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Menu Button -->
+  <button class="mobile-menu-btn" aria-label="Open menu">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <!-- ── SIDEBAR ── -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">🧬</div>
+        <div class="logo-text"><span>Bio</span>Tutor</div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item">
+          <i class="fa-solid fa-house"></i> Dashboard
+        </a>
+        <a href="pages/chat.html" class="nav-item">
+          <i class="fa-solid fa-robot"></i> AI Tutor
+          <span class="nav-badge">AI</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Study & 3D</div>
+        <a href="pages/anatomy.html" class="nav-item">
+          <i class="fa-solid fa-cube"></i> 3D Organ Systems <span class="nav-badge">3D</span>
+        </a>
+        <a href="pages/quiz.html" class="nav-item">
+          <i class="fa-solid fa-circle-question"></i> Quiz
+        </a>
+        <a href="pages/flashcards.html" class="nav-item">
+          <i class="fa-solid fa-layer-group"></i> Flashcards
+        </a>
+        <a href="pages/topics.html" class="nav-item">
+          <i class="fa-solid fa-book-open"></i> Topics
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Track</div>
+        <a href="pages/progress.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i> Progress
+        </a>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-divider"></div>
+        <div class="api-status" title="Click to manage API key">
+          <div class="status-dot"></div>
+          <div class="api-status-text">
+            <strong>API Key Required</strong>
+            <span>Click to configure</span>
+          </div>
+          <i class="fa-solid fa-gear" style="color: var(--text-muted); font-size: 0.8rem;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="main-content">
+
+      <!-- HERO -->
+      <section class="hero-section fade-in">
+        <div class="hero-badge"><i class="fa-solid fa-dna"></i> A-Level Biology · Sri Lanka Curriculum</div>
+        <h1>Your <span style="background:var(--grad-green);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">AI-Powered</span> Biology Tutor</h1>
+        <p>Master Grade 12 & 13 Biology with DeepSeek AI. Interactive chat, MCQ practice, smart flashcards — all in one place.</p>
+        <div class="hero-actions">
+          <a href="pages/chat.html" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-robot"></i> Start AI Session
+          </a>
+          <a href="pages/quiz.html" class="btn btn-secondary btn-lg">
+            <i class="fa-solid fa-circle-question"></i> Practice MCQs
+          </a>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card card-green">
+          <div class="icon-box icon-box-green"><i class="fa-solid fa-fire"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="currentStreak">0</div>
+            <div class="stat-label">Day Streak 🔥</div>
+          </div>
+        </div>
+        <div class="stat-card card-teal">
+          <div class="icon-box icon-box-teal"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalAnswered">0</div>
+            <div class="stat-label">Questions Answered</div>
+          </div>
+        </div>
+        <div class="stat-card card-purple">
+          <div class="icon-box icon-box-purple"><i class="fa-solid fa-bullseye"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="accuracyRate">—</div>
+            <div class="stat-label">Accuracy Rate</div>
+          </div>
+        </div>
+        <div class="stat-card card-orange">
+          <div class="icon-box icon-box-orange"><i class="fa-solid fa-layer-group"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="cardsStudied">0</div>
+            <div class="stat-label">Cards Studied</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK ACCESS -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <h2>Quick Access</h2>
+      </div>
+
+      <div class="quick-grid">
+        <a href="pages/chat.html" class="quick-card card-green">
+          <div class="quick-card-icon icon-box-green" style="width:52px;height:52px;border-radius:14px;">🤖</div>
+          <div>
+            <h3>AI Tutor Chat</h3>
+            <p>Ask anything about biology. Get instant, curriculum-aligned answers powered by DeepSeek AI.</p>
+          </div>
+          <div class="quick-card-arrow" style="color:var(--accent-green);">Start chatting <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+
+        <a href="pages/quiz.html" class="quick-card card-teal">
+          <div class="quick-card-icon icon-box-teal" style="width:52px;height:52px;border-radius:14px;">📝</div>
+          <div>
+            <h3>MCQ Practice</h3>
+            <p>Practice with 25+ built-in questions or let AI generate fresh MCQs on any topic.</p>
+          </div>
+          <div class="quick-card-arrow" style="color:var(--accent-teal);">Start quiz <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+
+        <a href="pages/flashcards.html" class="quick-card card-purple">
+          <div class="quick-card-icon icon-box-purple" style="width:52px;height:52px;border-radius:14px;">🃏</div>
+          <div>
+            <h3>Smart Flashcards</h3>
+            <p>Study 30+ biology terms with 3D flip cards. Spaced repetition for maximum retention.</p>
+          </div>
+          <div class="quick-card-arrow" style="color:var(--accent-purple);">Study now <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+
+        <a href="pages/topics.html" class="quick-card card-orange">
+          <div class="quick-card-icon icon-box-orange" style="width:52px;height:52px;border-radius:14px;">📚</div>
+          <div>
+            <h3>Topic Navigator</h3>
+            <p>Browse all Grade 12 & 13 biology units. Deep dive into subtopics with AI support.</p>
+          </div>
+          <div class="quick-card-arrow" style="color:var(--accent-orange);">Explore topics <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+      </div>
+
+      <!-- DAILY FACT -->
+      <div class="daily-fact-section">
+        <div class="daily-fact-header">
+          <div class="daily-fact-title"><i class="fa-solid fa-lightbulb"></i> AI Daily Fact</div>
+          <button class="btn btn-secondary btn-sm" id="newFactBtn" onclick="loadDailyFact()">
+            <i class="fa-solid fa-rotate"></i> New Fact
+          </button>
+        </div>
+        <p id="dailyFactText">
+          Click "New Fact" or configure your DeepSeek API key to get an AI-generated daily biology fact!
+          <span id="factTopicTag"></span>
+        </p>
+      </div>
+
+      <!-- TOPIC PROGRESS -->
+      <div class="topic-progress-section card" style="margin-bottom: 0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <h3>Topic Progress</h3>
+          <a href="pages/progress.html" class="btn btn-ghost btn-sm">View All <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div id="topicProgressList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- API KEY MODAL -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="icon-box icon-box-green"><i class="fa-solid fa-key"></i></div>
+        <div>
+          <h3 style="margin:0;">DeepSeek API Key</h3>
+          <small>Required for AI features</small>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="input-group" style="margin-bottom:14px;">
+          <label>API Key</label>
+          <input type="password" class="input" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" />
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 0;">
+          <i class="fa-solid fa-lock"></i> Your key is stored locally in your browser only. Get yours at
+          <a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent-teal);">platform.deepseek.com</a>
+        </p>
+        <div id="apiKeyStatus" style="margin-top:10px; font-size:0.85rem; font-weight:600;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="testApiKey"><i class="fa-solid fa-flask"></i> Test</button>
+        <button class="btn btn-primary" id="saveApiKey"><i class="fa-solid fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/deepseek.js"></script>
+  <script src="assets/js/topics.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    // ── Dashboard Init ──
+    function updateDashboardStats() {
+      const scores = Storage.getQuizScores();
+      const srsData = Storage.getSRSData();
+      const streak = Storage.getStudyStreak();
+
+      // Total answered
+      const total = scores.reduce((s, q) => s + (q.total || 0), 0);
+      document.getElementById('totalAnswered').textContent = total;
+
+      // Accuracy
+      if (total > 0) {
+        const correct = scores.reduce((s, q) => s + (q.correct || 0), 0);
+        document.getElementById('accuracyRate').textContent =
+          Math.round((correct / total) * 100) + '%';
+      }
+
+      // Cards studied
+      document.getElementById('cardsStudied').textContent = Object.keys(srsData).length;
+    }
+
+    function renderTopicProgress() {
+      const topicData = Storage.getTopicProgress();
+      const container = document.getElementById('topicProgressList');
+
+      const topicsToShow = BIOLOGY_TOPICS.slice(0, 6);
+      container.innerHTML = topicsToShow.map(topic => {
+        const data = topicData[topic.id] || { correct: 0, total: 0 };
+        const pct = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+        return `
+          <div class="topic-progress-item">
+            <div class="topic-progress-name">Gr${topic.grade} U${topic.unit}: ${topic.title}</div>
+            <div class="topic-progress-bar">
+              <div class="progress-bar">
+                <div class="progress-bar-fill" style="width:${pct}%"></div>
+              </div>
+            </div>
+            <div class="topic-progress-pct">${pct}%</div>
+          </div>`;
+      }).join('');
+    }
+
+    async function loadDailyFact() {
+      const apiKey = Storage.getApiKey();
+      if (!apiKey || !DeepSeek.isValidKey(apiKey)) {
+        ApiKeyModal.show();
+        return;
+      }
+
+      const btn = document.getElementById('newFactBtn');
+      const factEl = document.getElementById('dailyFactText');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+      factEl.innerHTML = '<span class="skeleton" style="height:20px;display:block;margin-bottom:8px;"></span><span class="skeleton" style="height:20px;display:block;width:80%;"></span>';
+
+      const randomTopic = BIOLOGY_TOPICS[Math.floor(Math.random() * BIOLOGY_TOPICS.length)];
+      try {
+        const fact = await DeepSeek.getDailyFact(randomTopic.title, apiKey);
+        factEl.innerHTML = fact + ` <span class="badge badge-green" style="margin-left:8px;vertical-align:middle;">${randomTopic.title}</span>`;
+      } catch (err) {
+        factEl.textContent = 'Could not load daily fact. Check your API key.';
+        Toast.show('API error: ' + err.message, 'error');
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-rotate"></i> New Fact';
+    }
+
+    updateDashboardStats();
+    renderTopicProgress();
+  </script>
+</body>
+</html>

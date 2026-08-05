@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flashcards — BioTutor</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/sidebar.css" />
+  <link rel="stylesheet" href="../assets/css/flashcard.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo"><div class="logo-icon">🧬</div><div class="logo-text"><span>Bio</span>Tutor</div></div>
+      <div class="nav-section">
+        <div class="nav-section-label">Main</div>
+        <a href="../index.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="chat.html" class="nav-item"><i class="fa-solid fa-robot"></i> AI Tutor <span class="nav-badge">AI</span></a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Study</div>
+        <a href="quiz.html" class="nav-item"><i class="fa-solid fa-circle-question"></i> Quiz</a>
+        <a href="flashcards.html" class="nav-item active"><i class="fa-solid fa-layer-group"></i> Flashcards</a>
+        <a href="topics.html" class="nav-item"><i class="fa-solid fa-book-open"></i> Topics</a>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Track</div><a href="progress.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Progress</a></div>
+      <div class="sidebar-footer">
+        <div class="sidebar-divider"></div>
+        <div class="api-status"><div class="status-dot"></div><div class="api-status-text"><strong>API Key Required</strong><span>Click to configure</span></div><i class="fa-solid fa-gear" style="color:var(--text-muted);font-size:0.8rem;"></i></div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Smart <span>Flashcards</span></h1>
+        <p>Study with 3D flip cards. AI can elaborate on any term. Spaced repetition tracks your progress.</p>
+      </div>
+
+      <!-- Deck Selector -->
+      <div style="margin-bottom:24px;">
+        <h3 style="margin-bottom:14px;">Choose a Deck</h3>
+        <div class="deck-list" id="deckList"></div>
+      </div>
+
+      <!-- Study Area (hidden until deck selected) -->
+      <div id="studyArea" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <h3 id="activeDeckTitle">Deck Name</h3>
+            <div class="deck-stats" id="deckStats"></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="shuffleDeck()"><i class="fa-solid fa-shuffle"></i> Shuffle</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeDeck()"><i class="fa-solid fa-xmark"></i> Close</button>
+          </div>
+        </div>
+
+        <!-- Card Scene -->
+        <div class="card-scene" id="cardScene" onclick="flipCard()">
+          <div class="card-3d" id="card3d">
+            <!-- Front -->
+            <div class="card-face front">
+              <div class="card-face-label">TERM</div>
+              <div class="card-term" id="cardTerm">Click to load</div>
+              <div class="card-hint"><i class="fa-solid fa-hand-pointer"></i> Click to reveal definition</div>
+            </div>
+            <!-- Back -->
+            <div class="card-face back">
+              <div class="card-face-label">DEFINITION</div>
+              <div class="card-definition" id="cardDefinition"></div>
+              <div class="card-example" id="cardExample" style="display:none;">
+                <strong>💡 Example</strong>
+                <span id="cardExampleText"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flip-hint" style="margin:12px 0;">
+          <i class="fa-solid fa-hand-pointer"></i> Click card to flip · Use arrows or keyboard ← →
+        </div>
+
+        <!-- Navigation -->
+        <div class="flashcard-nav" style="margin-bottom:16px;">
+          <button class="nav-arrow-btn" id="prevBtn" onclick="prevCard()"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="flashcard-counter"><span id="cardCurrent">1</span> / <span id="cardTotal">10</span></div>
+          <button class="nav-arrow-btn" id="nextCardBtn" onclick="nextCard()"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <!-- SRS Buttons (shown after flip) -->
+        <div class="srs-buttons" id="srsButtons" style="display:none;margin-bottom:16px;">
+          <div style="width:100%;text-align:center;font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;">How well did you know this?</div>
+          <button class="srs-btn srs-again" onclick="rateSRS('again')">😕 Again<small>Review soon</small></button>
+          <button class="srs-btn srs-hard" onclick="rateSRS('hard')">😐 Hard<small>In 3 days</small></button>
+          <button class="srs-btn srs-good" onclick="rateSRS('good')">😊 Good<small>In 7 days</small></button>
+          <button class="srs-btn srs-easy" onclick="rateSRS('easy')">🌟 Easy<small>In 14 days</small></button>
+        </div>
+
+        <!-- AI Elaborate -->
+        <div class="ai-elaborate-section">
+          <button class="btn btn-secondary btn-sm" id="elaborateBtn" onclick="elaborateCard()">
+            <i class="fa-solid fa-robot"></i> Ask AI to Elaborate
+          </button>
+          <div class="ai-elaborate-result" id="aiElaborateResult"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- API KEY MODAL -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="icon-box icon-box-green"><i class="fa-solid fa-key"></i></div>
+        <div><h3 style="margin:0;">DeepSeek API Key</h3><small>Required for AI elaboration</small></div>
+      </div>
+      <div class="modal-body">
+        <div class="input-group" style="margin-bottom:14px;">
+          <label>API Key</label>
+          <input type="password" class="input" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" />
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);">Get yours at <a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent-teal);">platform.deepseek.com</a></p>
+        <div id="apiKeyStatus" style="margin-top:10px;font-size:0.85rem;font-weight:600;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="testApiKey"><i class="fa-solid fa-flask"></i> Test</button>
+        <button class="btn btn-primary" id="saveApiKey"><i class="fa-solid fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/deepseek.js"></script>
+  <script src="../assets/js/topics.js"></script>
+  <script src="../assets/js/flashcard.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    let currentDeck = null;
+    let currentCards = [];
+    let currentCardIndex = 0;
+    let isFlipped = false;
+
+    // ── Render Deck List ──
+    function renderDeckList() {
+      const container = document.getElementById('deckList');
+      const srsData = Storage.getSRSData();
+
+      container.innerHTML = FLASHCARD_DECKS.map(deck => {
+        const reviewed = deck.cards.filter(c => srsData[c.id]).length;
+        return `
+          <div class="deck-item ${currentDeck?.id === deck.id ? 'active' : ''}" onclick="loadDeck('${deck.id}')">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span class="badge badge-${deck.color}">${deck.color === 'green' ? '🌿' : deck.color === 'teal' ? '🔬' : deck.color === 'purple' ? '🧬' : '🌍'}</span>
+              <h4 style="margin:0;">${deck.title}</h4>
+            </div>
+            <p>${deck.cards.length} cards · ${reviewed} reviewed</p>
+          </div>`;
+      }).join('');
+    }
+
+    function loadDeck(deckId) {
+      currentDeck = getDeckById(deckId);
+      currentCards = [...currentDeck.cards];
+      currentCardIndex = 0;
+
+      document.getElementById('activeDeckTitle').textContent = currentDeck.title;
+      document.getElementById('cardTotal').textContent = currentCards.length;
+      document.getElementById('studyArea').style.display = 'block';
+
+      renderDeckList();
+      updateDeckStats();
+      loadCard();
+
+      document.getElementById('studyArea').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeDeck() {
+      currentDeck = null;
+      document.getElementById('studyArea').style.display = 'none';
+      renderDeckList();
+    }
+
+    function updateDeckStats() {
+      const srsData = Storage.getSRSData();
+      const stats = { again: 0, hard: 0, good: 0, easy: 0, new: 0 };
+      currentCards.forEach(c => {
+        const d = srsData[c.id];
+        if (!d) stats.new++;
+        else stats[d.lastRating] = (stats[d.lastRating] || 0) + 1;
+      });
+
+      const colors = { new: '#64748b', again: '#ef4444', hard: '#f97316', good: '#06b6d4', easy: '#22c55e' };
+      document.getElementById('deckStats').innerHTML = Object.entries(stats)
+        .filter(([, v]) => v > 0)
+        .map(([k, v]) => `
+          <div class="deck-stat">
+            <div class="ds-dot" style="background:${colors[k]};"></div>
+            ${v} ${k}
+          </div>`).join('');
+    }
+
+    function loadCard() {
+      if (!currentCards[currentCardIndex]) return;
+      const card = currentCards[currentCardIndex];
+      isFlipped = false;
+
+      document.getElementById('card3d').classList.remove('flipped');
+      document.getElementById('cardTerm').textContent = card.term;
+      document.getElementById('cardDefinition').textContent = card.definition;
+
+      if (card.example) {
+        document.getElementById('cardExample').style.display = 'block';
+        document.getElementById('cardExampleText').textContent = card.example;
+      } else {
+        document.getElementById('cardExample').style.display = 'none';
+      }
+
+      document.getElementById('cardCurrent').textContent = currentCardIndex + 1;
+      document.getElementById('prevBtn').disabled = currentCardIndex === 0;
+      document.getElementById('nextCardBtn').disabled = currentCardIndex === currentCards.length - 1;
+
+      document.getElementById('srsButtons').style.display = 'none';
+      document.getElementById('aiElaborateResult').className = 'ai-elaborate-result';
+      document.getElementById('elaborateBtn').innerHTML = '<i class="fa-solid fa-robot"></i> Ask AI to Elaborate';
+    }
+
+    function flipCard() {
+      isFlipped = !isFlipped;
+      document.getElementById('card3d').classList.toggle('flipped', isFlipped);
+      if (isFlipped) {
+        document.getElementById('srsButtons').style.display = 'flex';
+        document.getElementById('srsButtons').style.flexWrap = 'wrap';
+      }
+    }
+
+    function prevCard() { if (currentCardIndex > 0) { currentCardIndex--; loadCard(); } }
+    function nextCard() { if (currentCardIndex < currentCards.length - 1) { currentCardIndex++; loadCard(); } }
+
+    function shuffleDeck() {
+      currentCards = [...currentCards].sort(() => Math.random() - 0.5);
+      currentCardIndex = 0;
+      loadCard();
+      Toast.show('Deck shuffled!', 'info', 1500);
+    }
+
+    function rateSRS(rating) {
+      const card = currentCards[currentCardIndex];
+      Storage.updateSRSCard(card.id, rating);
+      updateDeckStats();
+      Toast.show(`Rated: ${rating}`, 'success', 1500);
+      if (currentCardIndex < currentCards.length - 1) {
+        setTimeout(() => { currentCardIndex++; loadCard(); }, 400);
+      } else {
+        Toast.show('🎉 Deck complete! Great study session!', 'success', 3000);
+      }
+    }
+
+    async function elaborateCard() {
+      const apiKey = Storage.getApiKey();
+      if (!apiKey || !DeepSeek.isValidKey(apiKey)) {
+        ApiKeyModal.show();
+        return;
+      }
+
+      const card = currentCards[currentCardIndex];
+      const btn = document.getElementById('elaborateBtn');
+      const result = document.getElementById('aiElaborateResult');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI thinking...';
+      result.className = 'ai-elaborate-result';
+      result.textContent = '';
+
+      try {
+        const text = await DeepSeek.elaborateFlashcard(card.term, card.definition, apiKey);
+        result.className = 'ai-elaborate-result visible';
+        result.innerHTML = `<strong style="color:var(--accent-teal);font-size:0.78rem;display:block;margin-bottom:6px;">🤖 AI Elaboration</strong>${text}`;
+      } catch (err) {
+        Toast.show('AI elaboration failed', 'error');
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-robot"></i> Ask AI to Elaborate';
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft')  prevCard();
+      if (e.key === 'ArrowRight') nextCard();
+      if (e.key === ' ')          { e.preventDefault(); flipCard(); }
+    });
+
+    renderDeckList();
+  </script>
+</body>
+</html>

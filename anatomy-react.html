@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Organ Systems — BioTutor (React)</title>
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/sidebar.css" />
+  <link rel="stylesheet" href="/assets/css/anatomy3d.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-logo"><div class="logo-icon">🧬</div><div class="logo-text"><span>Bio</span>Tutor</div></div>
+      <div class="nav-section">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="pages/chat.html" class="nav-item"><i class="fa-solid fa-robot"></i> AI Tutor <span class="nav-badge">AI</span></a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Study &amp; 3D</div>
+        <a href="anatomy-react.html" class="nav-item active"><i class="fa-solid fa-cube"></i> 3D Organ Systems <span class="nav-badge">3D</span></a>
+        <a href="pages/quiz.html" class="nav-item"><i class="fa-solid fa-circle-question"></i> Quiz</a>
+        <a href="pages/flashcards.html" class="nav-item"><i class="fa-solid fa-layer-group"></i> Flashcards</a>
+        <a href="pages/topics.html" class="nav-item"><i class="fa-solid fa-book-open"></i> Topics</a>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Track</div><a href="pages/progress.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Progress</a></div>
+      <div class="sidebar-footer">
+        <div class="sidebar-divider"></div>
+        <div class="api-status"><div class="status-dot"></div><div class="api-status-text"><strong>API Key Required</strong><span>Click to configure</span></div><i class="fa-solid fa-gear" style="color:var(--text-muted);font-size:0.8rem;"></i></div>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT: React root -->
+    <main class="main-content" style="padding-bottom:10px;">
+      <div id="anatomy3d-root"></div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/anatomy-main.jsx"></script>
+</body>
+</html>

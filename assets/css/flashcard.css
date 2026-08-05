@@ -1,0 +1,294 @@
+/* ===================================================
+   BIO TUTOR — FLASHCARD STYLES
+   =================================================== */
+
+/* --- FLASHCARD LAYOUT --- */
+.flashcard-page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.flashcard-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.flashcard-controls select { max-width: 240px; }
+
+/* --- CARD SCENE --- */
+.card-scene {
+  width: 100%;
+  max-width: 680px;
+  height: 340px;
+  margin: 0 auto;
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.card-3d {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-3d.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px;
+  text-align: center;
+}
+
+/* FRONT - Term */
+.card-face.front {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+}
+
+.card-face.front::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--grad-green);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+/* BACK - Definition */
+.card-face.back {
+  background: rgba(34, 197, 94, 0.05);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  transform: rotateY(180deg);
+}
+
+.card-face.back::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--grad-purple);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.card-face-label {
+  position: absolute;
+  top: 16px; left: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+.card-term {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+.card-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-definition {
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  color: var(--text-primary);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.card-example {
+  margin-top: 8px;
+  padding: 10px 16px;
+  background: rgba(34,197,94,0.08);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--accent-green);
+  text-align: left;
+  width: 100%;
+}
+
+.card-example strong { color: var(--accent-green); font-size: 0.72rem; display: block; margin-bottom: 3px; }
+
+/* --- FLASHCARD NAVIGATION --- */
+.flashcard-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.flashcard-counter {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 80px;
+  text-align: center;
+}
+
+.flashcard-counter span { color: var(--accent-green); }
+
+.nav-arrow-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--trans);
+}
+
+.nav-arrow-btn:hover {
+  background: var(--accent-green-dim);
+  border-color: rgba(34,197,94,0.3);
+  color: var(--accent-green);
+}
+
+.nav-arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* --- SRS RATING BUTTONS --- */
+.srs-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.srs-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--trans);
+  border: 1px solid transparent;
+}
+
+.srs-btn small { font-size: 0.68rem; font-weight: 400; opacity: 0.8; }
+
+.srs-again  { background: rgba(239,68,68,0.12); color: #ef4444; border-color: rgba(239,68,68,0.3); }
+.srs-hard   { background: var(--accent-orange-dim); color: var(--accent-orange); border-color: rgba(249,115,22,0.3); }
+.srs-good   { background: var(--accent-teal-dim); color: var(--accent-teal); border-color: rgba(6,182,212,0.3); }
+.srs-easy   { background: var(--accent-green-dim); color: var(--accent-green); border-color: rgba(34,197,94,0.3); }
+
+.srs-btn:hover { transform: translateY(-2px); }
+
+/* --- AI ELABORATE BUTTON --- */
+.ai-elaborate-section {
+  text-align: center;
+}
+
+.ai-elaborate-result {
+  margin-top: 12px;
+  padding: 16px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: left;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  display: none;
+}
+
+.ai-elaborate-result.visible { display: block; animation: fadeIn 0.3s ease; }
+
+/* --- DECK STATS --- */
+.deck-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.deck-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.deck-stat .ds-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+/* --- DECK SELECTOR --- */
+.deck-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.deck-item {
+  padding: 18px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--trans);
+}
+
+.deck-item:hover {
+  border-color: rgba(34,197,94,0.3);
+  background: var(--accent-green-dim);
+}
+
+.deck-item.active {
+  border-color: var(--accent-green);
+  background: rgba(34,197,94,0.08);
+}
+
+.deck-item h4 { margin-bottom: 4px; font-size: 0.9rem; }
+
+.deck-item p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* --- FLIP HINT --- */
+.flip-hint {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}

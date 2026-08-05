@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCQ Quiz — BioTutor</title>
+  <meta name="description" content="Practice A-Level Biology MCQ questions with instant AI explanations." />
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/sidebar.css" />
+  <link rel="stylesheet" href="../assets/css/quiz.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <button class="mobile-menu-btn" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo"><div class="logo-icon">🧬</div><div class="logo-text"><span>Bio</span>Tutor</div></div>
+      <div class="nav-section">
+        <div class="nav-section-label">Main</div>
+        <a href="../index.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="chat.html" class="nav-item"><i class="fa-solid fa-robot"></i> AI Tutor <span class="nav-badge">AI</span></a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Study</div>
+        <a href="quiz.html" class="nav-item active"><i class="fa-solid fa-circle-question"></i> Quiz</a>
+        <a href="flashcards.html" class="nav-item"><i class="fa-solid fa-layer-group"></i> Flashcards</a>
+        <a href="topics.html" class="nav-item"><i class="fa-solid fa-book-open"></i> Topics</a>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Track</div><a href="progress.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Progress</a></div>
+      <div class="sidebar-footer">
+        <div class="sidebar-divider"></div>
+        <div class="api-status" title="Click to manage API key">
+          <div class="status-dot"></div>
+          <div class="api-status-text"><strong>API Key Required</strong><span>Click to configure</span></div>
+          <i class="fa-solid fa-gear" style="color:var(--text-muted);font-size:0.8rem;"></i>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1>MCQ <span>Practice</span></h1>
+        <p>Test your knowledge with built-in questions or let AI generate new ones</p>
+      </div>
+
+      <!-- ── SETUP SCREEN ── -->
+      <div id="quizSetup" class="quiz-setup">
+        <div class="card" style="margin-bottom:20px;">
+          <h3 style="margin-bottom:16px;"><i class="fa-solid fa-sliders" style="color:var(--accent-teal);margin-right:8px;"></i>Quiz Settings</h3>
+          <div class="quiz-setup-grid">
+            <div class="input-group">
+              <label>Topic</label>
+              <select class="input" id="setupTopic">
+                <option value="">All Topics (Random)</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Number of Questions</label>
+              <select class="input" id="setupCount">
+                <option value="5">5 Questions</option>
+                <option value="10" selected>10 Questions</option>
+                <option value="15">15 Questions</option>
+                <option value="20">20 Questions</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Question Source</label>
+              <select class="input" id="setupSource">
+                <option value="bank">Built-in Question Bank</option>
+                <option value="ai">AI Generated (DeepSeek)</option>
+                <option value="mixed">Mixed (Bank + AI)</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Timer Per Question</label>
+              <select class="input" id="setupTimer">
+                <option value="0">No Timer</option>
+                <option value="30">30 Seconds</option>
+                <option value="60" selected>60 Seconds</option>
+                <option value="90">90 Seconds</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="aiQuizNote" class="card card-teal" style="display:none;margin-bottom:16px;padding:14px 16px;">
+            <small><i class="fa-solid fa-robot" style="color:var(--accent-teal);"></i> <strong>AI Generated</strong> — DeepSeek will create fresh questions. Requires your API key. May take a few seconds.</small>
+          </div>
+
+          <button class="btn btn-primary btn-lg" id="startQuizBtn" onclick="startQuiz()">
+            <i class="fa-solid fa-play"></i> Start Quiz
+          </button>
+        </div>
+
+        <!-- Stats summary -->
+        <div class="grid-3">
+          <div class="card card-green" style="text-align:center;padding:20px 16px;">
+            <div style="font-size:1.8rem;font-weight:800;color:var(--accent-green);" id="bankQuestionCount">25</div>
+            <small>Questions in Bank</small>
+          </div>
+          <div class="card card-teal" style="text-align:center;padding:20px 16px;">
+            <div style="font-size:1.8rem;font-weight:800;color:var(--accent-teal);" id="totalAttempted">0</div>
+            <small>Total Attempted</small>
+          </div>
+          <div class="card card-purple" style="text-align:center;padding:20px 16px;">
+            <div style="font-size:1.8rem;font-weight:800;color:var(--accent-purple);" id="bestScore">—</div>
+            <small>Best Score</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── QUIZ SCREEN ── -->
+      <div id="quizScreen" class="quiz-container">
+        <!-- Quiz Header -->
+        <div class="quiz-header">
+          <div class="quiz-progress-info">
+            <div class="quiz-counter"><span id="currentQ">1</span> / <span id="totalQ">10</span></div>
+            <div class="quiz-score-display">Score: <span id="liveScore">0</span></div>
+          </div>
+          <div class="quiz-timer" id="quizTimer" style="display:none;">
+            <i class="fa-regular fa-clock"></i> <span id="timerDisplay">60</span>s
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-bar" style="margin-bottom:20px;">
+          <div class="progress-bar-fill" id="quizProgressFill" style="width:0%"></div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="question-card">
+          <div class="question-meta">
+            <span class="badge badge-green" id="questionTopic">Biology</span>
+            <span class="badge badge-teal" id="questionDifficulty">Medium</span>
+          </div>
+          <div class="question-text" id="questionText">Loading question...</div>
+          <div class="options-grid" id="optionsGrid"></div>
+
+          <!-- Feedback Panel -->
+          <div class="feedback-panel" id="feedbackPanel">
+            <div class="feedback-title" id="feedbackTitle"></div>
+            <div class="feedback-explanation" id="feedbackExplanation"></div>
+            <div class="ai-explanation" id="aiExplanation" style="display:none;">
+              <i class="fa-solid fa-robot" style="color:var(--accent-teal);"></i> <span id="aiExplanationText"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <div class="quiz-nav">
+          <button class="btn btn-secondary" onclick="quitQuiz()"><i class="fa-solid fa-xmark"></i> Quit</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>
+            Next <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── RESULTS SCREEN ── -->
+      <div id="quizResults" class="quiz-results">
+        <div class="card" style="padding:36px;">
+          <div class="result-score-ring">
+            <svg width="140" height="140">
+              <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+              <circle cx="70" cy="70" r="58" fill="none" stroke="url(#ringGrad)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="364" id="scoreRingFill" stroke-dashoffset="364"/>
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#22c55e"/>
+                  <stop offset="100%" stop-color="#06b6d4"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="score-text">
+              <div class="score-num" id="finalScorePct">0%</div>
+              <small>Score</small>
+            </div>
+          </div>
+
+          <h2 id="resultMessage">Quiz Complete!</h2>
+          <p id="resultSubMessage" style="margin-bottom:0;"></p>
+
+          <div class="result-stats">
+            <div class="result-stat">
+              <div class="stat-value" style="color:var(--accent-green);" id="resCorrect">0</div>
+              <div class="stat-label">✅ Correct</div>
+            </div>
+            <div class="result-stat">
+              <div class="stat-value" style="color:#ef4444;" id="resWrong">0</div>
+              <div class="stat-label">❌ Wrong</div>
+            </div>
+            <div class="result-stat">
+              <div class="stat-value" style="color:var(--accent-teal);" id="resTime">—</div>
+              <div class="stat-label">⏱ Time</div>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn btn-secondary" onclick="showSetup()"><i class="fa-solid fa-rotate"></i> Try Again</button>
+            <a href="chat.html" class="btn btn-secondary"><i class="fa-solid fa-robot"></i> Review with AI</a>
+            <button class="btn btn-primary" onclick="showSetup()"><i class="fa-solid fa-plus"></i> New Quiz</button>
+          </div>
+
+          <!-- Wrong Answers Review -->
+          <div class="wrong-answers-section" id="wrongAnswersSection" style="display:none;">
+            <h3 style="margin-bottom:12px;">❌ Review Wrong Answers</h3>
+            <div id="wrongAnswersList"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- API KEY MODAL -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="icon-box icon-box-green"><i class="fa-solid fa-key"></i></div>
+        <div><h3 style="margin:0;">DeepSeek API Key</h3><small>Required for AI questions</small></div>
+      </div>
+      <div class="modal-body">
+        <div class="input-group" style="margin-bottom:14px;">
+          <label>API Key</label>
+          <input type="password" class="input" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" />
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);">Stored locally only. Get yours at <a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent-teal);">platform.deepseek.com</a></p>
+        <div id="apiKeyStatus" style="margin-top:10px;font-size:0.85rem;font-weight:600;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="testApiKey"><i class="fa-solid fa-flask"></i> Test</button>
+        <button class="btn btn-primary" id="saveApiKey"><i class="fa-solid fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/deepseek.js"></script>
+  <script src="../assets/js/topics.js"></script>
+  <script src="../assets/js/quiz.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    // ── Quiz State ──
+    let quizQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+    let timerInterval = null;
+    let timeLeft = 0;
+    let quizStartTime = null;
+    let wrongAnswers = [];
+
+    // ── Init ──
+    function initQuizSetup() {
+      const sel = document.getElementById('setupTopic');
+      TopicUtils.getDropdownOptions().forEach(opt => {
+        const el = document.createElement('option');
+        el.value = opt.value;
+        el.textContent = opt.label;
+        sel.appendChild(el);
+      });
+
+      document.getElementById('bankQuestionCount').textContent = QUESTION_BANK.length;
+
+      // Stats
+      const scores = Storage.getQuizScores();
+      const total = scores.reduce((s, q) => s + (q.total || 0), 0);
+      document.getElementById('totalAttempted').textContent = total;
+      if (scores.length > 0) {
+        const best = Math.max(...scores.map(s => s.pct || 0));
+        document.getElementById('bestScore').textContent = best + '%';
+      }
+
+      document.getElementById('setupSource').addEventListener('change', function() {
+        document.getElementById('aiQuizNote').style.display = this.value !== 'bank' ? 'block' : 'none';
+      });
+    }
+
+    async function startQuiz() {
+      const topicId = document.getElementById('setupTopic').value;
+      const count = parseInt(document.getElementById('setupCount').value);
+      const source = document.getElementById('setupSource').value;
+      const timerSec = parseInt(document.getElementById('setupTimer').value);
+
+      let questions = [];
+
+      if (source === 'bank' || source === 'mixed') {
+        const bankQs = getRandomQuestions(source === 'mixed' ? Math.ceil(count * 0.6) : count, topicId || null);
+        questions.push(...bankQs);
+      }
+
+      if (source === 'ai' || source === 'mixed') {
+        const apiKey = Storage.getApiKey();
+        if (!apiKey || !DeepSeek.isValidKey(apiKey)) {
+          ApiKeyModal.show(() => startQuiz());
+          return;
+        }
+
+        const btn = document.getElementById('startQuizBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI is generating questions...';
+
+        const topicObj = topicId ? TopicUtils.getById(topicId) : BIOLOGY_TOPICS[Math.floor(Math.random() * BIOLOGY_TOPICS.length)];
+        const aiCount = source === 'mixed' ? Math.floor(count * 0.4) : count;
+
+        try {
+          const aiQs = await DeepSeek.generateMCQs(topicObj.title, aiCount, apiKey);
+          const formatted = aiQs.map((q, i) => ({
+            id: 'ai-' + i,
+            topic: topicObj.id,
+            difficulty: 'medium',
+            question: q.question,
+            options: q.options,
+            answer: q.answer,
+            explanation: q.explanation,
+          }));
+          questions.push(...formatted);
+        } catch (err) {
+          Toast.show('AI question generation failed: ' + err.message, 'error');
+          if (questions.length === 0) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-play"></i> Start Quiz';
+            return;
+          }
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-play"></i> Start Quiz';
+      }
+
+      if (questions.length === 0) {
+        Toast.show('No questions available for this topic', 'error');
+        return;
+      }
+
+      quizQuestions = shuffleArray(questions).slice(0, count);
+      currentIndex = 0;
+      score = 0;
+      wrongAnswers = [];
+      quizStartTime = Date.now();
+
+      document.getElementById('totalQ').textContent = quizQuestions.length;
+      document.getElementById('quizSetup').style.display = 'none';
+      document.getElementById('quizScreen').classList.add('active');
+
+      if (timerSec > 0) {
+        document.getElementById('quizTimer').style.display = 'flex';
+        timeLeft = timerSec;
+      } else {
+        document.getElementById('quizTimer').style.display = 'none';
+      }
+
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = quizQuestions[currentIndex];
+      answered = false;
+
+      // Update progress
+      document.getElementById('currentQ').textContent = currentIndex + 1;
+      document.getElementById('liveScore').textContent = score;
+      const pct = ((currentIndex) / quizQuestions.length) * 100;
+      document.getElementById('quizProgressFill').style.width = pct + '%';
+
+      // Topic & difficulty
+      const topicObj = TopicUtils.getById(q.topic);
+      document.getElementById('questionTopic').textContent = topicObj ? topicObj.title : 'Biology';
+      document.getElementById('questionDifficulty').textContent =
+        (q.difficulty || 'medium').charAt(0).toUpperCase() + (q.difficulty || 'medium').slice(1);
+
+      // Question text
+      document.getElementById('questionText').textContent = q.question;
+
+      // Options
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+      ['A', 'B', 'C', 'D'].forEach(letter => {
+        if (!q.options[letter]) return;
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.onclick = () => answerQuestion(letter, btn, q);
+        btn.innerHTML = `<div class="option-letter">${letter}</div><div>${q.options[letter]}</div>`;
+        grid.appendChild(btn);
+      });
+
+      // Hide feedback
+      const fp = document.getElementById('feedbackPanel');
+      fp.className = 'feedback-panel';
+      document.getElementById('aiExplanation').style.display = 'none';
+
+      // Next btn
+      document.getElementById('nextBtn').disabled = true;
+      document.getElementById('nextBtn').textContent = currentIndex === quizQuestions.length - 1 ? '🏁 Finish' : 'Next →';
+
+      // Timer
+      clearInterval(timerInterval);
+      const timerEl = document.getElementById('quizTimer');
+      if (timerEl.style.display !== 'none') {
+        const setupTimer = parseInt(document.getElementById('setupTimer').value);
+        timeLeft = setupTimer;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          updateTimerDisplay();
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            if (!answered) autoAnswer();
+          }
+        }, 1000);
+      }
+    }
+
+    function updateTimerDisplay() {
+      const el = document.getElementById('timerDisplay');
+      const timerEl = document.getElementById('quizTimer');
+      el.textContent = timeLeft;
+      if (timeLeft <= 10) timerEl.className = 'quiz-timer danger';
+      else if (timeLeft <= 20) timerEl.className = 'quiz-timer warning';
+      else timerEl.className = 'quiz-timer';
+    }
+
+    function autoAnswer() {
+      if (answered) return;
+      const q = quizQuestions[currentIndex];
+      const correctBtn = [...document.querySelectorAll('.option-btn')].find(b =>
+        b.querySelector('.option-letter').textContent === q.answer
+      );
+      if (correctBtn) {
+        correctBtn.classList.add('correct');
+        wrongAnswers.push({ q, userAnswer: '(Time out)', correctAnswer: q.answer });
+        showFeedback(false, q);
+        document.getElementById('nextBtn').disabled = false;
+        answered = true;
+      }
+    }
+
+    function answerQuestion(letter, btnEl, q) {
+      if (answered) return;
+      answered = true;
+      clearInterval(timerInterval);
+
+      const isCorrect = letter === q.answer;
+
+      // Mark all buttons
+      document.querySelectorAll('.option-btn').forEach(b => {
+        b.disabled = true;
+        if (b.querySelector('.option-letter').textContent === q.answer) b.classList.add('correct');
+      });
+
+      if (!isCorrect) {
+        btnEl.classList.add('wrong');
+        wrongAnswers.push({ q, userAnswer: letter, correctAnswer: q.answer });
+      } else {
+        score++;
+      }
+
+      // Topic progress
+      Storage.updateTopicProgress(q.topic, isCorrect ? 1 : 0, 1);
+
+      showFeedback(isCorrect, q);
+      document.getElementById('nextBtn').disabled = false;
+    }
+
+    function showFeedback(isCorrect, q) {
+      const fp = document.getElementById('feedbackPanel');
+      fp.className = `feedback-panel ${isCorrect ? 'correct' : 'wrong'} visible`;
+      document.getElementById('feedbackTitle').innerHTML =
+        isCorrect ? '✅ Correct! Well done!' : `❌ Incorrect. The answer is <strong>${q.answer}</strong>`;
+      document.getElementById('feedbackExplanation').innerHTML =
+        q.explanation.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      if (currentIndex >= quizQuestions.length) {
+        showResults();
+      } else {
+        loadQuestion();
+      }
+    }
+
+    function showResults() {
+      clearInterval(timerInterval);
+      const elapsed = Math.round((Date.now() - quizStartTime) / 1000);
+      const total = quizQuestions.length;
+      const pct = Math.round((score / total) * 100);
+
+      document.getElementById('quizScreen').classList.remove('active');
+      document.getElementById('quizResults').classList.add('active');
+
+      document.getElementById('finalScorePct').textContent = pct + '%';
+      document.getElementById('resCorrect').textContent = score;
+      document.getElementById('resWrong').textContent = total - score;
+      document.getElementById('resTime').textContent = elapsed + 's';
+
+      // Ring animation
+      const fill = document.getElementById('scoreRingFill');
+      const dashLen = 364;
+      fill.style.transition = 'stroke-dashoffset 1.2s ease';
+      fill.style.strokeDashoffset = dashLen - (dashLen * pct / 100);
+
+      // Result message
+      let msg = pct >= 80 ? '🌟 Excellent!' : pct >= 60 ? '👍 Good Work!' : pct >= 40 ? '📖 Keep Studying!' : '💪 Don\'t Give Up!';
+      document.getElementById('resultMessage').textContent = msg;
+      document.getElementById('resultSubMessage').textContent =
+        `You answered ${score} of ${total} correctly in ${elapsed} seconds.`;
+
+      // Save score
+      Storage.addQuizScore({ correct: score, total, pct });
+
+      // Wrong answers
+      if (wrongAnswers.length > 0) {
+        document.getElementById('wrongAnswersSection').style.display = 'block';
+        document.getElementById('wrongAnswersList').innerHTML = wrongAnswers.map(w => `
+          <div class="wrong-answer-item">
+            <div class="wrong-answer-q">${w.q.question}</div>
+            <div class="wrong-answer-info">Your answer: ${w.userAnswer} &nbsp;|&nbsp; Correct: <span>${w.correctAnswer}: ${w.q.options[w.correctAnswer]}</span></div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function quitQuiz() {
+      if (confirm('Quit this quiz?')) showSetup();
+    }
+
+    function showSetup() {
+      clearInterval(timerInterval);
+      document.getElementById('quizScreen').classList.remove('active');
+      document.getElementById('quizResults').classList.remove('active');
+      document.getElementById('quizSetup').style.display = 'block';
+      initQuizSetup();
+    }
+
+    initQuizSetup();
+  </script>
+</body>
+</html>
