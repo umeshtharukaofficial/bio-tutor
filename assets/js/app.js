@@ -201,8 +201,33 @@ function updateStreakDisplay() {
   }
 }
 
+// ─── Dark/Light Theme Toggle ───
+function initThemeToggle() {
+  const settings = Storage.getSettings();
+  const currentTheme = settings.theme || 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+
+  // Bind theme toggle buttons if present
+  const themeBtns = document.querySelectorAll('.theme-toggle-btn');
+  themeBtns.forEach(btn => {
+    btn.innerHTML = currentTheme === 'light' ? '<i class="fa-solid fa-moon"></i> Dark Mode' : '<i class="fa-solid fa-sun"></i> Light Mode';
+    btn.addEventListener('click', () => {
+      const activeTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = activeTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      Storage.updateSettings({ theme: newTheme });
+      
+      themeBtns.forEach(b => {
+        b.innerHTML = newTheme === 'light' ? '<i class="fa-solid fa-moon"></i> Dark Mode' : '<i class="fa-solid fa-sun"></i> Light Mode';
+      });
+      Toast.show(`Switched to ${newTheme === 'light' ? 'Light Mode ☀️' : 'Deep Space Dark Mode 🌙'}`, 'info', 2000);
+    });
+  });
+}
+
 // ─── Init App ───
 document.addEventListener('DOMContentLoaded', () => {
+  initThemeToggle();
   Toast.init();
   setActiveNavItem();
   initMobileSidebar();
