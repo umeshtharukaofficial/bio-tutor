@@ -516,6 +516,18 @@ function init3DViewer() {
     if (currentGroup && isAutoRotating) {
       currentGroup.rotation.y += 0.004;
     }
+
+    // Interactive 3D Heartbeat Contraction (72 BPM rhythm: contraction & relaxation pulse)
+    if (currentGroup && isHeartbeating) {
+      heartbeatTimer += 0.08;
+      const pulse = 1 + Math.sin(heartbeatTimer * 4) * 0.08 + (Math.sin(heartbeatTimer * 8) > 0.5 ? 0.04 : 0);
+      currentGroup.children.forEach(child => {
+        if (child.userData && (child.userData.organId === 'heart' || child.userData.organId === 'arteries')) {
+          child.scale.set(pulse, pulse, pulse);
+        }
+      });
+    }
+
     renderer.render(scene, camera);
   }
   animate();
@@ -684,6 +696,19 @@ function toggleWireframe() {
       }
     });
   }
+}
+
+let isHeartbeating = false;
+let heartbeatTimer = 0;
+
+function toggleHeartbeat() {
+  isHeartbeating = !isHeartbeating;
+  const btn = document.getElementById('heartbeatBtn');
+  if (btn) {
+    btn.classList.toggle('active', isHeartbeating);
+    btn.style.background = isHeartbeating ? 'rgba(236,72,153,0.25)' : 'var(--bg-glass)';
+  }
+  Toast.show(isHeartbeating ? '🫀 Heartbeat Simulation: Contraction Active (72 BPM)' : 'Heartbeat Simulation Paused', 'info', 2000);
 }
 
 function reset3DView() {

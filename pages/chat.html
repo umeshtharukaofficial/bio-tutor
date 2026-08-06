@@ -145,16 +145,19 @@
               <textarea
                 class="chat-textarea"
                 id="chatInput"
-                placeholder="Ask anything about A-Level Biology..."
+                placeholder="Ask anything about A-Level Biology (or click Mic)..."
                 rows="1"
                 onkeydown="handleInputKey(event)"
                 oninput="autoResize(this)"
               ></textarea>
+              <button class="send-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="Voice Input (Speech-to-Text)" style="background:var(--bg-glass);border:1px solid var(--border);color:var(--accent-teal);">
+                <i class="fa-solid fa-microphone" id="voiceIcon"></i>
+              </button>
               <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send (Enter)">
                 <i class="fa-solid fa-paper-plane"></i>
               </button>
             </div>
-            <div class="chat-input-hint">Press <kbd style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:0.7rem;">Enter</kbd> to send · <kbd style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:0.7rem;">Shift+Enter</kbd> for newline</div>
+            <div class="chat-input-hint">Press <kbd style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:0.7rem;">Enter</kbd> to send · <kbd style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:0.7rem;">Shift+Enter</kbd> for newline · <i class="fa-solid fa-microphone"></i> Mic for Speech Input</div>
           </div>
         </div>
       </div>
@@ -357,6 +360,67 @@
         e.preventDefault();
         sendMessage();
       }
+    }
+
+    // ── Speech Recognition Voice Input ──
+    let recognition = null;
+    let isListening = false;
+
+    function toggleVoiceInput() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        Toast.show('Voice input is not supported in this browser', 'error');
+        return;
+      }
+
+      const voiceIcon = document.getElementById('voiceIcon');
+      const voiceBtn = document.getElementById('voiceBtn');
+
+      if (isListening) {
+        recognition.stop();
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US'; // Supports Sinhala / English speech recognition
+
+      recognition.onstart = () => {
+        isListening = true;
+        voiceIcon.className = 'fa-solid fa-microphone-slash';
+        voiceBtn.style.color = '#ef4444';
+        voiceBtn.style.borderColor = '#ef4444';
+        Toast.show('🎙️ Listening... Speak your biology question', 'info', 2500);
+      };
+
+      recognition.onresult = (e) => {
+        const transcript = Array.from(e.results)
+          .map(result => result[0].transcript)
+          .join('');
+        const input = document.getElementById('chatInput');
+        input.value = transcript;
+        autoResize(input);
+      };
+
+      recognition.onerror = (e) => {
+        console.warn('Speech error:', e.error);
+        Toast.show('Speech recognition error: ' + e.error, 'error');
+        stopVoiceState();
+      };
+
+      recognition.onend = () => {
+        stopVoiceState();
+      };
+
+      function stopVoiceState() {
+        isListening = false;
+        voiceIcon.className = 'fa-solid fa-microphone';
+        voiceBtn.style.color = 'var(--accent-teal)';
+        voiceBtn.style.borderColor = 'var(--border)';
+      }
+
+      recognition.start();
     }
 
     function setQuickPrompt(text) {

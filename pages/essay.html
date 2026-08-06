@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Essay Evaluator — BioTutor</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/sidebar.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .essay-card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      backdrop-filter: blur(20px);
+      margin-bottom: 24px;
+    }
+    .essay-textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: vertical;
+      margin-bottom: 16px;
+    }
+    .essay-textarea:focus { outline: none; border-color: var(--accent-green); }
+    .eval-result-card {
+      display: none;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      margin-top: 24px;
+    }
+    .score-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 100px;
+      background: var(--accent-green-dim);
+      color: var(--accent-green);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <button class="mobile-menu-btn" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo"><div class="logo-icon">🧬</div><div class="logo-text"><span>Bio</span>Tutor</div></div>
+      <div class="nav-section">
+        <div class="nav-section-label">Main</div>
+        <a href="../index.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="chat.html" class="nav-item"><i class="fa-solid fa-robot"></i> AI Tutor <span class="nav-badge">AI</span></a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Study & Tools</div>
+        <a href="anatomy.html" class="nav-item"><i class="fa-solid fa-cube"></i> 3D Organ Systems <span class="nav-badge">3D</span></a>
+        <a href="essay.html" class="nav-item active"><i class="fa-solid fa-pen-nib"></i> Essay Evaluator <span class="nav-badge">NEW</span></a>
+        <a href="quiz.html" class="nav-item"><i class="fa-solid fa-circle-question"></i> Quiz</a>
+        <a href="flashcards.html" class="nav-item"><i class="fa-solid fa-layer-group"></i> Flashcards</a>
+        <a href="topics.html" class="nav-item"><i class="fa-solid fa-book-open"></i> Topics</a>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Track</div><a href="progress.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Progress</a></div>
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" title="Toggle Dark/Light Mode"><i class="fa-solid fa-sun"></i> Light Mode</button>
+        <div class="sidebar-divider"></div>
+        <div class="api-status"><div class="status-dot"></div><div class="api-status-text"><strong>API Key Required</strong><span>Click to configure</span></div><i class="fa-solid fa-gear" style="color:var(--text-muted);font-size:0.8rem;"></i></div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1>AI Structured <span>Essay Evaluator</span></h1>
+        <p>Type or paste your answer for Sri Lanka A/L Biology Paper II structured essay questions to get instant marking scheme scoring & feedback.</p>
+      </div>
+
+      <div class="essay-card">
+        <div style="margin-bottom:14px;">
+          <label style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;">Select Curriculum Unit:</label>
+          <select id="essayUnit" class="input" style="max-width:320px;">
+            <option value="Unit 1: Cell Biology">Unit 1: Cell Biology (Grade 12)</option>
+            <option value="Unit 2: Biochemistry">Unit 2: Biochemistry (Grade 12)</option>
+            <option value="Unit 4: Plant Form & Function">Unit 4: Plant Form & Function (Grade 12)</option>
+            <option value="Unit 5: Animal Form & Function">Unit 5: Animal Form & Function (Grade 12)</option>
+            <option value="Unit 6: Genetics">Unit 6: Genetics (Grade 13)</option>
+            <option value="Unit 8: Ecology">Unit 8: Ecology (Grade 13)</option>
+            <option value="Unit 10: Biotechnology">Unit 10: Biotechnology (Grade 13)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;">Essay Question Prompt / Title:</label>
+          <input type="text" id="essayQuestion" class="input" placeholder="e.g. Describe the process of blood clotting in humans and its regulation." value="Describe the human digestive system structure and lipid digestion." />
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;">Your Student Answer (Sinhala or English):</label>
+          <textarea id="essayAnswer" class="essay-textarea" placeholder="Type your full structured answer here... (e.g. Lipids are emulsified by bile salts in the duodenum...)"></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="evaluateEssay()" id="evalBtn">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Evaluate Answer with AI Marking Scheme
+        </button>
+      </div>
+
+      <div class="eval-result-card" id="evalResultCard">
+        <div class="score-badge" id="evalScore">Score: 8/10</div>
+        <h3 style="margin-bottom:12px;">📋 Official Marking Scheme Breakdown & Feedback:</h3>
+        <div id="evalFeedbackContent" style="color:var(--text-secondary);line-height:1.6;"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- API KEY MODAL -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal">
+      <div class="modal-header"><div class="icon-box icon-box-green"><i class="fa-solid fa-key"></i></div><div><h3 style="margin:0;">DeepSeek API Key</h3><small>Required for AI Essay Evaluation</small></div></div>
+      <div class="modal-body">
+        <div class="input-group" style="margin-bottom:14px;"><label>API Key</label><input type="password" class="input" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" /></div>
+        <p style="font-size:0.8rem;color:var(--text-muted);">Get yours at <a href="https://platform.deepseek.com" target="_blank" style="color:var(--accent-teal);">platform.deepseek.com</a></p>
+        <div id="apiKeyStatus" style="margin-top:10px;font-size:0.85rem;font-weight:600;"></div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" id="testApiKey"><i class="fa-solid fa-flask"></i> Test</button><button class="btn btn-primary" id="saveApiKey"><i class="fa-solid fa-check"></i> Save</button></div>
+    </div>
+  </div>
+
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/deepseek.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    async function evaluateEssay() {
+      const question = document.getElementById('essayQuestion').value.trim();
+      const answer = document.getElementById('essayAnswer').value.trim();
+      const unit = document.getElementById('essayUnit').value;
+
+      if (!answer) {
+        Toast.show('Please enter your student essay answer to evaluate!', 'error');
+        return;
+      }
+
+      const apiKey = Storage.getApiKey();
+      if (!apiKey || !DeepSeek.isValidKey(apiKey)) {
+        ApiKeyModal.show(() => evaluateEssay());
+        return;
+      }
+
+      const btn = document.getElementById('evalBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Evaluating against Sri Lanka A/L Marking Scheme...';
+
+      const prompt = `Grade the following Sri Lanka A/L Biology essay answer based on official NIE resource book marking scheme standards.
+Curriculum Unit: ${unit}
+Question Prompt: "${question}"
+Student Answer: "${answer}"
+
+Provide output in clean markdown:
+1. Assigned Mark out of 10 (Format: ## Score: X/10)
+2. Points Awarded (List key points present in student answer)
+3. Missing Key Marking Points (Points needed for full marks)
+4. Corrections & Sinhala ZWJ spelling check (if applicable)
+5. Exam Tips to reach 10/10`;
+
+      try {
+        const feedback = await DeepSeek.ask(prompt, apiKey);
+        const card = document.getElementById('evalResultCard');
+        card.style.display = 'block';
+        document.getElementById('evalFeedbackContent').innerHTML = renderMarkdown(feedback);
+        Toast.show('Essay Evaluation Complete! 🎓', 'success');
+      } catch (err) {
+        Toast.show('Evaluation Error: ' + err.message, 'error');
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Evaluate Answer with AI Marking Scheme';
+    }
+  </script>
+</body>
+</html>
