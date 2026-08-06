@@ -1,0 +1,24 @@
+{
+  "name": "BioTutor AI — A-Level Biology",
+  "short_name": "BioTutor",
+  "description": "AI-Powered Sri Lanka A-Level Biology Learning Platform with 3D Organ Systems and Offline Study Tools",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#22c55e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

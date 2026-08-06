@@ -257,8 +257,25 @@ function initThemeToggle() {
   });
 }
 
+// ─── PWA Service Worker Registration ───
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      const swPath = window.location.pathname.includes('/pages/') ? '../sw.js' : './sw.js';
+      navigator.serviceWorker.register(swPath)
+        .then((reg) => {
+          console.log('[PWA] ServiceWorker registered with scope:', reg.scope);
+        })
+        .catch((err) => {
+          console.warn('[PWA] ServiceWorker registration failed:', err);
+        });
+    });
+  }
+}
+
 // ─── Init App ───
 document.addEventListener('DOMContentLoaded', () => {
+  registerServiceWorker();
   initThemeToggle();
   Toast.init();
   setActiveNavItem();
