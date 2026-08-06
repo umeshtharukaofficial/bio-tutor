@@ -22,7 +22,8 @@ Your role:
 - Reference specific units when relevant (e.g., "Unit 6: Genetics", "Unit 2: Biochemistry")
 - Use bullet points and numbered lists to improve readability
 - Bold key terms using **term** markdown syntax
-- Keep responses concise but complete — under 400 words unless a detailed explanation is explicitly requested
+- Keep responses structured, complete, and fully detailed — never cut off explanations prematurely
+- Always finish all thoughts, bullet points, and summaries completely
 - Generate MCQ questions when asked, always with 4 options (A, B, C, D) and clear explanations
 - Always provide memory tips (mnemonics) where possible
 - Be encouraging and motivating — use phrases like "Great question!", "Let's break this down"
@@ -74,7 +75,7 @@ const DeepSeek = {
   async *streamChat(messages, apiKey, options = {}) {
     const {
       temperature = 0.7,
-      maxTokens = 1500,
+      maxTokens = 3500,
       topicContext = null,
     } = options;
 
@@ -135,6 +136,18 @@ const DeepSeek = {
         } catch {
           // skip malformed chunks
         }
+      }
+    }
+
+    // Process leftover buffer content if any
+    if (buffer.trim() && buffer.trim().startsWith('data: ')) {
+      const dataStr = buffer.trim().slice(6);
+      if (dataStr !== '[DONE]') {
+        try {
+          const parsed = JSON.parse(dataStr);
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) yield delta;
+        } catch {}
       }
     }
   },
