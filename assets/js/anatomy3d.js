@@ -740,8 +740,15 @@ function renderInfoPanel(organ) {
 
   if (titleEl) {
     titleEl.innerHTML = `
-      <div class="info-title-en">${activeSystem.name[activeLang]}</div>
-      <div class="info-title-si"><i class="fa-solid fa-location-crosshairs" style="color:var(--accent-green);margin-right:6px;"></i>${organ.name[activeLang]}</div>`;
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div>
+          <div class="info-title-en">${activeSystem.name[activeLang]}</div>
+          <div class="info-title-si"><i class="fa-solid fa-location-crosshairs" style="color:var(--accent-green);margin-right:6px;"></i>${organ.name[activeLang]}</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="BioAudio.speak('${organ.name[activeLang].replace(/'/g, "\\'")}', '${activeLang}')" title="Listen Pronunciation">
+          <i class="fa-solid fa-volume-high" style="color:var(--accent-teal);"></i> 🔊
+        </button>
+      </div>`;
   }
 
   if (refEl) refEl.textContent = activeSystem.resourceRef;
@@ -757,7 +764,12 @@ function renderInfoPanel(organ) {
     descEl.innerHTML = `
       <div style="margin-bottom:14px;color:var(--text-secondary);">${activeSystem.description[activeLang]}</div>
       <div class="detail-box">
-        <h4>🔬 ${organ.name[activeLang]} - ${activeLang === 'si' ? 'ප්‍රධාන කෘත්‍යයන්' : 'Key Functions'}</h4>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <h4 style="margin:0;">🔬 ${organ.name[activeLang]} - ${activeLang === 'si' ? 'ප්‍රධාන කෘත්‍යයන්' : 'Key Functions'}</h4>
+          <button class="btn btn-secondary btn-sm" style="padding:2px 8px;font-size:0.75rem;" onclick="BioAudio.speak('${organ.name[activeLang].replace(/'/g, "\\'")} - ${organ.info[activeLang].replace(/'/g, "\\'")}', '${activeLang}')">
+            <i class="fa-solid fa-volume-high"></i> Read Text
+          </button>
+        </div>
         <p>${organ.info[activeLang]}</p>
       </div>`;
   }

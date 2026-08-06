@@ -192,6 +192,38 @@ function initMobileSidebar() {
   });
 }
 
+// ─── Web Speech API Audio Pronunciation Engine ───
+const BioAudio = {
+  synth: window.speechSynthesis || null,
+
+  speak(text, lang = 'en') {
+    if (!this.synth) {
+      Toast.show('Audio Speech API is not supported on this browser', 'error');
+      return;
+    }
+
+    this.synth.cancel(); // Stop any ongoing speech
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+
+    // Detect language code
+    if (lang === 'si' || /[\u0D80-\u0DFF]/.test(text)) {
+      utterance.lang = 'si-LK';
+    } else {
+      utterance.lang = 'en-US';
+    }
+
+    const voices = this.synth.getVoices();
+    const matchingVoice = voices.find(v => v.lang.startsWith(lang === 'si' ? 'si' : 'en'));
+    if (matchingVoice) utterance.voice = matchingVoice;
+
+    this.synth.speak(utterance);
+    Toast.show(`🔊 Pronouncing: ${text}`, 'info', 1800);
+  }
+};
+
 // ─── Update study streak display ───
 function updateStreakDisplay() {
   const streakEl = document.getElementById('currentStreak');
